@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("caps-in-30.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bfa568e086c6fd2e8d1645cfd0c91c086c7d5402")]
 [assembly: System.Reflection.AssemblyProductAttribute("caps-in-30.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("caps-in-30.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

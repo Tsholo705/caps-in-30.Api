@@ -170,3 +170,4 @@ C:\Users\lolol\caps-in-30.Api\obj\Debug\net10.0\refint\caps-in-30.Api.dll
 C:\Users\lolol\caps-in-30.Api\obj\Debug\net10.0\caps-in-30.Api.pdb
 C:\Users\lolol\caps-in-30.Api\obj\Debug\net10.0\caps-in-30.Api.genruntimeconfig.cache
 C:\Users\lolol\caps-in-30.Api\obj\Debug\net10.0\ref\caps-in-30.Api.dll
+C:\Users\lolol\caps-in-30.Api\obj\Debug\net10.0\caps-in-30.Api.sourcelink.json

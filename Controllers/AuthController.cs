@@ -15,11 +15,11 @@ namespace caps_in_30.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        // IConfiguration field reads appsettings.json values 
         private readonly IConfiguration _config;
 
-        // Inject IConfiguration into constructor 
-        public AuthController(ApplicationDbContext context, IConfiguration config)
+        public AuthController(
+            ApplicationDbContext context,
+            IConfiguration config)
         {
             _context = context;
             _config = config;
@@ -33,7 +33,8 @@ namespace caps_in_30.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (await _context.Users.AnyAsync(u => u.Username.ToLower() == request.Username.ToLower()))
+            if (await _context.Users.AnyAsync(
+                u => u.Username.ToLower() == request.Username.ToLower()))
             {
                 return BadRequest("Username is already taken.");
             }
@@ -52,7 +53,15 @@ namespace caps_in_30.Api.Controllers
             _context.Users.Add(newUser);
             await _context.SaveChangesAsync();
 
-            return Ok(new { message = "Registration successful!", username = newUser.Username });
+            return Ok(new
+            {
+                message = "Registration successful!",
+                userId = newUser.Id,
+                name = newUser.Name,
+                username = newUser.Username,
+                email = newUser.Email,
+                grade = newUser.Grade
+            });
         }
 
         [HttpPost("login")]
@@ -63,7 +72,9 @@ namespace caps_in_30.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == request.Username.ToLower());
+            var user = await _context.Users.FirstOrDefaultAsync(
+                u => u.Username.ToLower() == request.Username.ToLower());
+
             if (user == null)
             {
                 return BadRequest("Invalid username or password.");
@@ -74,43 +85,71 @@ namespace caps_in_30.Api.Controllers
                 return BadRequest("Invalid username or password.");
             }
 
-            // Generates the secure token for a logged-in user session 
+            // Generate JWT token
             var token = GenerateJwtToken(user);
 
-            // Includes the token string in your JSON response object 
             return Ok(new
             {
                 message = "Login successful!",
-                token = token, // For Postman testing  
+                token = token,
                 userId = user.Id,
                 name = user.Name,
+                username = user.Username,
+                email = user.Email,
+                grade = user.Grade
             });
         }
 
-        // 5. ADD THIS: Helper method to handle the token generation math 
         private string GenerateJwtToken(User user)
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(
+                    ClaimTypes.NameIdentifier,
+                    user.Id.ToString()
+                ),
+
+                new Claim(
+                    JwtRegisteredClaimNames.Email,
+                    user.Email
+                ),
+
+                new Claim(
+                    ClaimTypes.Name,
+                    user.Name
+                )
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var duration = double.Parse(_config["Jwt:DurationInMinutes"] ?? "60");
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    _config["Jwt:Key"]!
+                )
+            );
+
+            var creds = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256
+            );
+
+            var duration = double.Parse(
+                _config["Jwt:DurationInMinutes"] ?? "60"
+            );
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
+
                 Expires = DateTime.UtcNow.AddMinutes(duration),
+
                 Issuer = _config["Jwt:Issuer"],
+
                 Audience = _config["Jwt:Audience"],
+
                 SigningCredentials = creds
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
+
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
