@@ -26,18 +26,15 @@ namespace caps_in_30.Api.Controllers
         {
             var query = _context.TeamCards
                 .AsNoTracking()
-                .AsQueryable();
+                .Include(c => c.Subject)
+                .Include(c => c.Category)
+                .Where(c => c.Grade == grade);
 
-            // Filter by grade
-            query = query.Where(c => c.Grade == grade);
-
-            // Filter by subject if supplied
             if (subjectId.HasValue)
             {
                 query = query.Where(c => c.SubjectId == subjectId.Value);
             }
 
-            // Filter by category if supplied
             if (categoryId.HasValue)
             {
                 query = query.Where(c => c.CategoryId == categoryId.Value);
@@ -45,12 +42,23 @@ namespace caps_in_30.Api.Controllers
 
             var cards = await query.ToListAsync();
 
-            // Randomise the cards
-            var shuffledCards = cards
+            var result = cards
                 .OrderBy(c => Guid.NewGuid())
+                .Select(c => new TeamCardDto
+                {
+                    Id = c.Id,
+                    Grade = c.Grade,
+                    Subject = c.Subject.Name,
+                    Topic = c.Category.Name,
+                    Term = c.Term,
+                    ForbiddenWords = System.Text.Json.JsonSerializer
+                        .Deserialize<List<string>>(c.ForbiddenWords)
+                        ?? new List<string>(),
+                    Points = c.Points
+                })
                 .ToList();
 
-            return Ok(shuffledCards);
+            return Ok(result);
         }
 
         // GET: api/teamcards/1

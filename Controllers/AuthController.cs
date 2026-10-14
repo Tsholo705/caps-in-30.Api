@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,8 @@ namespace caps_in_30.Api.Controllers
             _config = config;
         }
 
+        // POST: api/auth/register
+
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto request)
         {
@@ -33,37 +36,65 @@ namespace caps_in_30.Api.Controllers
                 return BadRequest(ModelState);
             }
 
+            // Check whether the username is already taken
             if (await _context.Users.AnyAsync(
                 u => u.Username.ToLower() == request.Username.ToLower()))
             {
                 return BadRequest("Username is already taken.");
             }
 
+            // Find the access code
+            var accessCode = await _context.AccessCodes.FirstOrDefaultAsync(
+                c => c.Code == request.AccessCode);
+
+            // Check whether the code exists
+            if (accessCode == null)
+            {
+                return BadRequest("Invalid access code.");
+            }
+
+            // Check whether the code has already been used
+            if (accessCode.IsUsed)
+            {
+                return BadRequest("This access code has already been used.");
+            }
+
+            // Check whether the code matches the learner's grade
+            if (accessCode.Grade != request.Grade)
+            {
+                return BadRequest("This access code is not valid for your grade.");
+            }
+
+            // Hash the password before saving it
             string hashedPassword = BC.HashPassword(request.Password);
 
             var newUser = new User
             {
                 Name = request.Name,
                 Username = request.Username,
-                Email = request.Email,
                 PasswordHash = hashedPassword,
-                Grade = request.Grade,
+                Grade = request.Grade
             };
 
             _context.Users.Add(newUser);
+
+            // Mark the access code as used
+            accessCode.IsUsed = true;
+            accessCode.UsedAt = DateTime.UtcNow;
+
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
-                message = "Registration successful!",
+                message = "Registration successful.",
                 userId = newUser.Id,
                 name = newUser.Name,
                 username = newUser.Username,
-                email = newUser.Email,
                 grade = newUser.Grade
             });
         }
 
+        // POST: api/auth/login
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto request)
         {
@@ -95,35 +126,33 @@ namespace caps_in_30.Api.Controllers
                 userId = user.Id,
                 name = user.Name,
                 username = user.Username,
-                email = user.Email,
                 grade = user.Grade
             });
         }
+
 
         private string GenerateJwtToken(User user)
         {
             var claims = new[]
             {
-                new Claim(
-                    ClaimTypes.NameIdentifier,
-                    user.Id.ToString()
-                ),
+        new Claim(
+            ClaimTypes.NameIdentifier,
+            user.Id.ToString()
+        ),
 
-                new Claim(
-                    JwtRegisteredClaimNames.Email,
-                    user.Email
-                ),
+        new Claim(
+            ClaimTypes.Name,
+            user.Name
+        ),
 
-                new Claim(
-                    ClaimTypes.Name,
-                    user.Name
-                )
-            };
+        new Claim(
+            JwtRegisteredClaimNames.UniqueName,
+            user.Username
+        )
+    };
 
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    _config["Jwt:Key"]!
-                )
+                Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)
             );
 
             var creds = new SigningCredentials(
@@ -138,18 +167,13 @@ namespace caps_in_30.Api.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-
                 Expires = DateTime.UtcNow.AddMinutes(duration),
-
                 Issuer = _config["Jwt:Issuer"],
-
                 Audience = _config["Jwt:Audience"],
-
                 SigningCredentials = creds
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
-
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);

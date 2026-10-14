@@ -17,6 +17,7 @@ namespace caps_in_30.Api.Data
         public DbSet<Score> Scores { get; set; }
         public DbSet<TeamGame> TeamGames { get; set; }
         public DbSet<TeamCard> TeamCards { get; set; }
+        public DbSet<AccessCode> AccessCodes { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
