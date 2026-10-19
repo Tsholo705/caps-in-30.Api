@@ -3,13 +3,23 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using caps_in_30.Api.Data;
+using Microsoft.EntityFrameworkCore.Storage;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//If DatabaseProvider isn't set, the application uses DefaultConnection
+
+var connectionName = builder.Configuration["DatabaseProvider"] ?? "DefaultConnection";
+
+Console.WriteLine($"DATABASE PROVIDER SELECTED: {connectionName}");
+Console.WriteLine(
+    $"SELECTED CONNECTION STRING EXISTS: " +
+    $"{!string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString(connectionName))}"
+);
 // Registers the Database Context Bridge using SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
+        builder.Configuration.GetConnectionString(connectionName)
     ));
 
 // Registers JWT Authentication Services and Schemes
