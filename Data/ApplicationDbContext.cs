@@ -18,6 +18,7 @@ namespace caps_in_30.Api.Data
         public DbSet<TeamGame> TeamGames { get; set; }
         public DbSet<TeamCard> TeamCards { get; set; }
         public DbSet<AccessCode> AccessCodes { get; set; }
+        public DbSet<SpellingWord> SpellingWords { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -57,6 +58,20 @@ namespace caps_in_30.Api.Data
                 .HasOne(c => c.Category)
                 .WithMany()
                 .HasForeignKey(c => c.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Subject → Spelling Words
+            modelBuilder.Entity<SpellingWord>()
+                .HasOne(w => w.Subject)
+                .WithMany()
+                .HasForeignKey(w => w.SubjectId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Category → Spelling Words
+            modelBuilder.Entity<SpellingWord>()
+                .HasOne(w => w.Category)
+                .WithMany()
+                .HasForeignKey(w => w.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

@@ -154,6 +154,36 @@ namespace caps_in_30.Api.Migrations
                     b.ToTable("Scores");
                 });
 
+            modelBuilder.Entity("caps_in_30.Api.Models.SpellingWord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Grade")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Word")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("SpellingWords");
+                });
+
             modelBuilder.Entity("caps_in_30.Api.Models.Subject", b =>
                 {
                     b.Property<int>("Id")
@@ -320,6 +350,25 @@ namespace caps_in_30.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("caps_in_30.Api.Models.SpellingWord", b =>
+                {
+                    b.HasOne("caps_in_30.Api.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("caps_in_30.Api.Models.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("caps_in_30.Api.Models.TeamCard", b =>
