@@ -25,7 +25,7 @@ namespace caps_in_30.Api.Controllers
             string topic,
             int howMany = 10)
         {
-            if (grade != 3 && !=7 && !=8)
+            if (grade != 3 && grade !=7 && grade !=8)
             {
                 return BadRequest("Grade must be 3, 7 or 8.");
             }
