@@ -94,10 +94,17 @@ namespace caps_in_30.Api.Controllers
                 .AsNoTracking()
                 .Where(c =>
                     c.SubjectId == subjectId &&
+                    (
                     _context.Questions.Any(q =>
                         q.CategoryId == c.Id &&
                         q.SubjectId == subjectId &&
-                        q.Grade == grade))
+                        q.Grade == grade)
+                    ||
+                    _context.SpellingWords.Any(w =>
+                        w.CategoryId == c.Id &&
+                        w.SubjectId == subjectId &&
+                        w.Grade == grade)
+                ))
                 .ToListAsync();
 
             return Ok(categories);
