@@ -82,5 +82,26 @@ namespace caps_in_30.Api.Controllers
                 category
             );
         }
+
+        
+        // GET: api/categories/by-subject/7/grade/3
+        [HttpGet("by-subject/{subjectId}/grade/{grade}")]
+        public async Task<ActionResult<IEnumerable<Category>>> GetCategoriesBySubjectAndGrade(
+            int subjectId,
+            int grade)
+        {
+            var categories = await _context.Categories
+                .AsNoTracking()
+                .Where(c =>
+                    c.SubjectId == subjectId &&
+                    _context.Questions.Any(q =>
+                        q.CategoryId == c.Id &&
+                        q.SubjectId == subjectId &&
+                        q.Grade == grade))
+                .ToListAsync();
+
+            return Ok(categories);
+        }
+
     }
 }

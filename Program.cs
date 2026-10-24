@@ -53,7 +53,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins( "http://localhost:5173",
+                "https://caps-in-30-frontend.vercel.app")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
