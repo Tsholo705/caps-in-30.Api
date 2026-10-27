@@ -184,6 +184,50 @@ namespace caps_in_30.Api.Migrations
                     b.ToTable("SpellingWords");
                 });
 
+            modelBuilder.Entity("caps_in_30.Api.Models.StudySession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Date")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsComplete")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Minutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StartTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TimetableId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TimetableId");
+
+                    b.ToTable("StudySessions");
+                });
+
             modelBuilder.Entity("caps_in_30.Api.Models.Subject", b =>
                 {
                     b.Property<int>("Id")
@@ -280,6 +324,35 @@ namespace caps_in_30.Api.Migrations
                     b.ToTable("TeamGames");
                 });
 
+            modelBuilder.Entity("caps_in_30.Api.Models.Timetable", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Timetables");
+                });
+
             modelBuilder.Entity("caps_in_30.Api.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -371,6 +444,17 @@ namespace caps_in_30.Api.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("caps_in_30.Api.Models.StudySession", b =>
+                {
+                    b.HasOne("caps_in_30.Api.Models.Timetable", "Timetable")
+                        .WithMany("Sessions")
+                        .HasForeignKey("TimetableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Timetable");
+                });
+
             modelBuilder.Entity("caps_in_30.Api.Models.TeamCard", b =>
                 {
                     b.HasOne("caps_in_30.Api.Models.Category", "Category")
@@ -390,6 +474,17 @@ namespace caps_in_30.Api.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("caps_in_30.Api.Models.Timetable", b =>
+                {
+                    b.HasOne("caps_in_30.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("caps_in_30.Api.Models.Category", b =>
                 {
                     b.Navigation("Questions");
@@ -398,6 +493,11 @@ namespace caps_in_30.Api.Migrations
             modelBuilder.Entity("caps_in_30.Api.Models.Subject", b =>
                 {
                     b.Navigation("Categories");
+                });
+
+            modelBuilder.Entity("caps_in_30.Api.Models.Timetable", b =>
+                {
+                    b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
         }

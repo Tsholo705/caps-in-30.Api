@@ -19,7 +19,8 @@ namespace caps_in_30.Api.Data
         public DbSet<TeamCard> TeamCards { get; set; }
         public DbSet<AccessCode> AccessCodes { get; set; }
         public DbSet<SpellingWord> SpellingWords { get; set; }
-
+        public DbSet<Timetable> Timetables { get; set; }
+        public DbSet<StudySession> StudySessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -73,6 +74,18 @@ namespace caps_in_30.Api.Data
                 .WithMany()
                 .HasForeignKey(w => w.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Timetable>()
+                .HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StudySession>()
+                .HasOne(s => s.Timetable)
+                .WithMany(t => t.Sessions)
+                .HasForeignKey(s => s.TimetableId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
