@@ -1,4 +1,4 @@
-
+using System.Text.Json.Serialization;
 namespace caps_in_30.Api.Models
 {
     // One study session on a specific date.
@@ -7,6 +7,8 @@ namespace caps_in_30.Api.Models
         public int Id { get; set; }
 
         public int TimetableId { get; set; }
+        
+        [JsonIgnore]
         public Timetable Timetable { get; set; } = null!;
 
         public string Date { get; set; } = string.Empty;
