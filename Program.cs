@@ -19,7 +19,8 @@ Console.WriteLine(
 // Registers the Database Context Bridge using SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString(connectionName)
+        builder.Configuration.GetConnectionString(connectionName),
+        sqlOptions => sqlOptions.EnableRetryOnFailure()
     ));
 
 // Registers JWT Authentication Services and Schemes
